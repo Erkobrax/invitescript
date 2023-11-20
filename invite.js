@@ -23,7 +23,7 @@ function inviteUsers(users) {
             axios.get(`https://api.github.com/users/${user.github}`)
                 .then(response => {
                     const profileuser = JSON.parse(JSON.stringify(response.data))
-                    const user_id = profileuser.id
+                    const user_id = profileuser.id // Может высылать инвайты только по почте или id, по никнему не может
                     octokit.request(`POST /orgs/${org}/invitations`, {
                         invitee_id: user_id,
                         role: 'direct_member',
