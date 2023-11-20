@@ -1,13 +1,15 @@
 const axios = require('axios');
-const token = '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'; // Ваш GitHub Personal Access Token
+const {Octokit} = require("@octokit/core");
+const octokit = new Octokit({ auth: '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' });
+const token = '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'; // Ваш GitHub Personal Access Token
 const org = 'Suvorov-Kamyshnikov'; // Название вашей организации на GitHub
 const repoOwner = 'Erkobrax'; // Имя пользователя, владельца репозитория
 const repoName = 'invitescript'; // Название репозитория
 const filePath = 'usernames.json'; // Путь к JSON файлу в репозитории
 
-axios.get('https://api.github.com/repos/Erkobrax/invitescript/contents/usernames.json',{
+axios.get(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,{
     headers:{
-        'Authorization': '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',
+        'Authorization': `${token}`,
         'Accept': 'application/vnd.github.v3.raw'
 }
 })
@@ -18,13 +20,19 @@ axios.get('https://api.github.com/repos/Erkobrax/invitescript/contents/usernames
 function inviteUsers(users) {
     users.forEach(user => {
         if (user.github) {
-            axios.post(`https://api.github.com/orgs/Suvorov-Kamyshnikov/invitations`, {
-                invitee_id: user.github
-            }, {
-                headers: { 'Authorization': `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` }
-            })
-                .then(() => console.log(`Приглашение отправлено пользователю ${user.github}`))
-                .catch(error => console.error(`Ошибка при отправке приглашения ${user.github}: ${error}`));
+            axios.get(`https://api.github.com/users/${user.github}`)
+                .then(response => {
+                    const profileuser = JSON.parse(JSON.stringify(response.data))
+                    const user_id = profileuser.id
+                    octokit.request(`POST /orgs/${org}/invitations`, {
+                        invitee_id: user_id,
+                        role: 'direct_member',
+                    })
+                        .then(() => console.log(`Приглашение отправлено пользователю ${user.github}`))
+                        .catch(error => {
+                            console.error('Ошибка при отправке приглашения:', error);
+                        });
+                });
         }
     });
 }
