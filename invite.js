@@ -1,18 +1,12 @@
 const axios = require('axios');
 const {Octokit} = require("@octokit/core");
 const octokit = new Octokit({ auth: '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' });
-const token = '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'; // Ваш GitHub Personal Access Token
 const org = 'Suvorov-Kamyshnikov'; // Название вашей организации на GitHub
 const repoOwner = 'Erkobrax'; // Имя пользователя, владельца репозитория
 const repoName = 'invitescript'; // Название репозитория
 const filePath = 'usernames.json'; // Путь к JSON файлу в репозитории
 
-axios.get(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,{
-    headers:{
-        'Authorization': `${token}`,
-        'Accept': 'application/vnd.github.v3.raw'
-}
-})
+octokit.request(`GET /repos/${org}/${repoName}/contents/${filePath}`)
 .then(response =>{
     const users = JSON.parse(JSON.stringify(response.data));
     inviteUsers(users);
